@@ -70,7 +70,6 @@
   top: 0;
   left: -280px;
   width: 280px;
-  max-width: 80vw;
   height: 100%;
   background: var(--bg-color);
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
@@ -161,8 +160,7 @@
 .container {
   background: var(--container-bg);
   padding: 20px;
-  width: 100%;
-  max-width: 360px;
+  width: 360px;
   border-radius: 14px;
   box-shadow: 0 10px 30px var(--shadow-color);
   transition: background 0.3s ease, box-shadow 0.3s ease, width 0.3s ease;
