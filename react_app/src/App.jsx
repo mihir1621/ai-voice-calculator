@@ -45,6 +45,32 @@ function App() {
     }
   }, [isDark]);
 
+  // Load background from localStorage on mount
+  useEffect(() => {
+    const savedBg = localStorage.getItem('bgMedia');
+    if (savedBg) {
+      try {
+        setBgMedia(JSON.parse(savedBg));
+      } catch (e) {
+        console.error('Failed to load background:', e);
+      }
+    }
+  }, []);
+
+  // Save background to localStorage when it changes
+  useEffect(() => {
+    try {
+      if (bgMedia) {
+        localStorage.setItem('bgMedia', JSON.stringify(bgMedia));
+      } else {
+        localStorage.removeItem('bgMedia');
+      }
+    } catch (error) {
+      console.error('Failed to save background:', error);
+      // Optional: Notify user if file is too large
+    }
+  }, [bgMedia]);
+
   // Handle keyboard input
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -67,12 +93,15 @@ function App() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const fileURL = URL.createObjectURL(file);
-    if (file.type.startsWith('image/')) {
-      setBgMedia({ type: 'image', src: fileURL });
-    } else if (file.type.startsWith('video/')) {
-      setBgMedia({ type: 'video', src: fileURL });
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (file.type.startsWith('image/')) {
+        setBgMedia({ type: 'image', src: reader.result });
+      } else if (file.type.startsWith('video/')) {
+        setBgMedia({ type: 'video', src: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleSidebar = () => {

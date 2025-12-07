@@ -104,7 +104,8 @@ body {
 .container {
     background: var(--container-bg);
     padding: 20px;
-    width: 360px;
+    width: 100%;
+    max-width: 360px;
     border-radius: 14px;
     box-shadow: 0 10px 30px var(--shadow-color);
     transition: background 0.3s ease, box-shadow 0.3s ease, width 0.3s ease;
@@ -113,7 +114,7 @@ body {
 
 /* Scientific mode horizontal layout */
 .container.scientific-mode {
-    width: 750px;
+    max-width: 750px;
 }
 
 .header {
@@ -560,4 +561,10 @@ input:checked+.mode-slider .toggle-text::after {
 
 .calendar-btn:hover {
     transform: scale(1.1);
+}
+@media (max-width: 600px) {
+    .date-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
