@@ -192,8 +192,15 @@ function processVoiceInput(spoken) {
 }
 
 export function useCalculator() {
-    const [display, setDisplay] = useState('');
-    const [lastCalculated, setLastCalculated] = useState(false);
+    const [history, setHistory] = useState([]);
+
+    const addToHistory = (expression, result) => {
+        setHistory(prev => [...prev, { expression, result, timestamp: new Date() }]);
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+    };
 
     const append = (value) => {
         if (lastCalculated && !isNaN(value)) {
@@ -244,6 +251,7 @@ export function useCalculator() {
                 setDisplay(res);
                 setLastCalculated(true);
                 speakResult(res);
+                addToHistory(expr, res);
                 return;
             }
             // sqrt shortcut
@@ -257,6 +265,7 @@ export function useCalculator() {
                     const res = Number.isInteger(resVal) ? String(resVal) : resVal.toFixed(6).replace(/\.0+$/, '');
                     setDisplay(res);
                     speakResult(res);
+                    addToHistory(expr, res);
                 }
                 setLastCalculated(true);
                 return;
@@ -266,6 +275,7 @@ export function useCalculator() {
             setDisplay(resStr);
             setLastCalculated(true);
             speakResult(resStr);
+            addToHistory(expr, resStr);
         } catch (e) {
             setDisplay('Error');
             speakResult('Error');
@@ -277,6 +287,8 @@ export function useCalculator() {
             const val = display;
             const numVal = Number(safeEval(val || '0'));
             let result;
+            let expr = val; // Default expression representation
+
             switch (action) {
                 case '%': {
                     const re = /(\d+(?:\.\d+)?)\s*([+\-*/])\s*(\d+(?:\.\d+)?$)/;
@@ -286,54 +298,69 @@ export function useCalculator() {
                         const op = m[2];
                         const B = parseFloat(m[3]);
                         const computed = (A * B) / 100;
-                        setDisplay(val.slice(0, m.index) + A + op + computed);
+                        const newExpr = val.slice(0, m.index) + A + op + computed;
+                        setDisplay(newExpr);
+                        // History for this is tricky as it's an intermediate step usually, but we can log it
                         return;
                     }
                     const m2 = val.match(/(.*?)(\d+(?:\.\d+)?$)/);
                     if (m2) {
                         const prefix = m2[1];
                         const lastNum = parseFloat(m2[2]);
-                        setDisplay(prefix + (lastNum / 100));
+                        const res = prefix + (lastNum / 100);
+                        setDisplay(res);
+                        addToHistory(`${lastNum}%`, String(lastNum / 100));
                     }
                     return;
                 }
                 case 'square':
                     result = numVal * numVal;
+                    expr = `sqr(${val})`;
                     break;
                 case 'sqrt':
                     if (numVal < 0) throw new Error();
                     result = Math.sqrt(numVal);
+                    expr = `sqrt(${val})`;
                     break;
                 case 'sin':
                     result = Math.sin(numVal);
+                    expr = `sin(${val})`;
                     break;
                 case 'cos':
                     result = Math.cos(numVal);
+                    expr = `cos(${val})`;
                     break;
                 case 'tan':
                     result = Math.tan(numVal);
+                    expr = `tan(${val})`;
                     break;
                 case 'asin':
                     if (Math.abs(numVal) > 1) throw new Error();
                     result = Math.asin(numVal);
+                    expr = `asin(${val})`;
                     break;
                 case 'acos':
                     if (Math.abs(numVal) > 1) throw new Error();
                     result = Math.acos(numVal);
+                    expr = `acos(${val})`;
                     break;
                 case 'atan':
                     result = Math.atan(numVal);
+                    expr = `atan(${val})`;
                     break;
                 case 'ln':
                     if (numVal <= 0) throw new Error();
                     result = Math.log(numVal);
+                    expr = `ln(${val})`;
                     break;
                 case 'log':
                     if (numVal <= 0) throw new Error();
                     result = Math.log10(numVal);
+                    expr = `log(${val})`;
                     break;
                 case 'exp':
                     result = Math.exp(numVal);
+                    expr = `exp(${val})`;
                     break;
                 case '^':
                     setDisplay((prev) => prev + '^');
@@ -351,6 +378,7 @@ export function useCalculator() {
                 setDisplay(formatted);
                 setLastCalculated(true);
                 speakResult(formatted);
+                addToHistory(expr, formatted);
             }
         } catch (e) {
             setDisplay('Error');
@@ -378,6 +406,7 @@ export function useCalculator() {
                     const res = Number.isInteger(resVal) ? String(resVal) : resVal.toFixed(6).replace(/\.0+$/, '');
                     setDisplay(res);
                     speakResult(res);
+                    addToHistory(spoken, res);
                 }
                 setLastCalculated(true);
                 return;
@@ -393,6 +422,7 @@ export function useCalculator() {
                     setDisplay(resStr);
                     setLastCalculated(true);
                     speakResult(resStr);
+                    addToHistory(spoken, resStr);
                     return;
                 } catch { }
             }
@@ -411,6 +441,7 @@ export function useCalculator() {
                         setDisplay(resStr);
                         setLastCalculated(true);
                         speakResult(resStr);
+                        addToHistory(spoken, resStr);
                         return;
                     }
                     // Try arithmetic progression detection
@@ -422,6 +453,7 @@ export function useCalculator() {
                         setDisplay(resStr);
                         setLastCalculated(true);
                         speakResult(resStr);
+                        addToHistory(spoken, resStr);
                         return;
                     }
                 }
@@ -434,6 +466,7 @@ export function useCalculator() {
                 setDisplay(finalResult);
                 setLastCalculated(true);
                 speakResult(finalResult);
+                addToHistory(spoken, finalResult);
             } catch (aiError) {
                 console.error("AI Error caught in hook:", aiError);
                 if (aiError.message.includes('API Key')) {
@@ -460,5 +493,7 @@ export function useCalculator() {
         calculate,
         handleAction,
         handleVoiceInput,
+        history,
+        clearHistory
     };
 }
