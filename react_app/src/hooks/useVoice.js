@@ -2,39 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 
 export function useVoice(onInput) {
     const [isListening, setIsListening] = useState(false);
-    const [statusText, setStatusText] = useState("");
+    const [statusText, setStatusText] = useState(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        return SpeechRecognition ? "" : "Voice input not supported in this browser.";
+    });
     const recognitionRef = useRef(null);
     const onInputRef = useRef(onInput);
 
     useEffect(() => {
         onInputRef.current = onInput;
     }, [onInput]);
-
-    useEffect(() => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            recognitionRef.current = new SpeechRecognition();
-            recognitionRef.current.lang = "en-US";
-
-            recognitionRef.current.onstart = () => {
-                setIsListening(true);
-                setStatusText("Listening...");
-            };
-
-            recognitionRef.current.onend = () => {
-                setIsListening(false);
-                setStatusText("Stopped listening.");
-            };
-
-            recognitionRef.current.onresult = (event) => {
-                let spoken = event.results[0][0].transcript.toLowerCase();
-                setStatusText("You said: " + spoken);
-                processVoiceInput(spoken);
-            };
-        } else {
-            setStatusText("Voice input not supported in this browser.");
-        }
-    }, []);
 
     const processVoiceInput = (spoken) => {
         const conversions = {
@@ -78,6 +55,30 @@ export function useVoice(onInput) {
             onInputRef.current(spoken);
         }
     };
+
+    useEffect(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognitionRef.current = new SpeechRecognition();
+            recognitionRef.current.lang = "en-US";
+
+            recognitionRef.current.onstart = () => {
+                setIsListening(true);
+                setStatusText("Listening...");
+            };
+
+            recognitionRef.current.onend = () => {
+                setIsListening(false);
+                setStatusText("Stopped listening.");
+            };
+
+            recognitionRef.current.onresult = (event) => {
+                let spoken = event.results[0][0].transcript.toLowerCase();
+                setStatusText("You said: " + spoken);
+                processVoiceInput(spoken);
+            };
+        }
+    }, []);
 
     const startListening = () => {
         if (recognitionRef.current) {

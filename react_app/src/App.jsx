@@ -4,7 +4,6 @@ import Display from './components/Display';
 import VoiceControl from './components/VoiceControl';
 import Keypad from './components/Keypad';
 import DateCalculator from './components/DateCalculator';
-import History from './components/History';
 import { useCalculator } from './hooks/useCalculator';
 import { useVoice } from './hooks/useVoice';
 import './App.css'; // Ensure we import specific app styles if needed
@@ -13,10 +12,21 @@ function App() {
   const [isDark, setIsDark] = useState(true);
   const [isScientific, setIsScientific] = useState(false);
   const [isDateMode, setIsDateMode] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [bgMedia, setBgMedia] = useState(null); // { type: 'image' | 'video', src: string }
-  const fileInputRef = useRef(null);
 
+  // Load background from localStorage (lazy initialization)
+  const [bgMedia, setBgMedia] = useState(() => {
+    const savedBg = localStorage.getItem('bgMedia');
+    if (savedBg) {
+      try {
+        return JSON.parse(savedBg);
+      } catch (e) {
+        console.error('Failed to load background:', e);
+      }
+    }
+    return null;
+  });
+
+  const fileInputRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const {
@@ -26,13 +36,10 @@ function App() {
     deleteLast,
     calculate,
     handleAction,
-    handleVoiceInput,
-    history,
-    clearHistory
+    handleVoiceInput
   } = useCalculator();
 
   const {
-    isListening,
     statusText,
     startListening,
     stopListening
@@ -48,18 +55,6 @@ function App() {
       document.body.classList.remove('dark-mode');
     }
   }, [isDark]);
-
-  // Load background from localStorage on mount
-  useEffect(() => {
-    const savedBg = localStorage.getItem('bgMedia');
-    if (savedBg) {
-      try {
-        setBgMedia(JSON.parse(savedBg));
-      } catch (e) {
-        console.error('Failed to load background:', e);
-      }
-    }
-  }, []);
 
   // Save background to localStorage when it changes
   useEffect(() => {
@@ -163,7 +158,7 @@ function App() {
             <button className="icon-btn" onClick={toggleSidebar}>&times;</button>
           </div>
           <div className="sidebar-content">
-            <button className="menu-item" onClick={() => { setIsHistoryOpen(true); setIsSidebarOpen(false); }}>History</button>
+            <button className="menu-item" onClick={() => switchMode('history')}>History</button>
             <button className="menu-item" onClick={() => switchMode('date')}>Date Calculator</button>
             <button
               className="menu-item"
@@ -215,18 +210,6 @@ function App() {
             </>
           )}
         </div>
-
-        {/* History Panel - Rendered here to be inside the container for absolute positioning */}
-        <History
-          isOpen={isHistoryOpen}
-          history={history}
-          onSelect={(val) => {
-            append(val);
-            setIsHistoryOpen(false);
-          }}
-          onClose={() => setIsHistoryOpen(false)}
-          onClear={clearHistory}
-        />
       </div >
     </>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StandardKeys = ({ onInput, onAction, onClear, onEqual, onDelete }) => {
+const StandardKeys = ({ onInput, onAction, onClear, onEqual }) => {
     return (
         <div className="std-keys">
             {/* Row 1 */}

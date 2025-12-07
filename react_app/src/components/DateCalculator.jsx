@@ -1,33 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
-const DateCalculator = () => {
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
-    const [results, setResults] = useState({
-        exact: 'Same dates',
-        days: '0 days',
-        weeks: '0 weeks, 0 days',
-        months: '0 months, 0 days',
-        business: '0 days'
-    });
-
-    useEffect(() => {
-        // Set default dates to today (DD-MM-YYYY)
+const DateCalculator = ({ onClose }) => {
+    // Initialize dates to today
+    const getToday = () => {
         const now = new Date();
         const d = String(now.getDate()).padStart(2, '0');
         const m = String(now.getMonth() + 1).padStart(2, '0');
         const y = now.getFullYear();
-        const today = `${d}-${m}-${y}`;
-        setDateFrom(today);
-        setDateTo(today);
-    }, []);
+        return `${d}-${m}-${y}`;
+    };
 
-    useEffect(() => {
-        calculateDateDifference();
-    }, [dateFrom, dateTo]);
+    const [dateFrom, setDateFrom] = useState(getToday);
+    const [dateTo, setDateTo] = useState(getToday);
 
-    const calculateDateDifference = () => {
-        if (!dateFrom || !dateTo || dateFrom.length < 8 || dateTo.length < 8) return;
+    const results = useMemo(() => {
+        if (!dateFrom || !dateTo || dateFrom.length < 8 || dateTo.length < 8) {
+            return {
+                exact: 'Invalid dates',
+                days: '-',
+                weeks: '-',
+                months: '-',
+                business: '-'
+            };
+        }
 
         // Parse dates (DD-MM-YYYY)
         const [d1_val, m1, y1] = dateFrom.split('-').map(Number);
@@ -36,7 +31,15 @@ const DateCalculator = () => {
         const d1 = new Date(y1, m1 - 1, d1_val);
         const d2 = new Date(y2, m2 - 1, d2_val);
 
-        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return;
+        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+            return {
+                exact: 'Invalid dates',
+                days: '-',
+                weeks: '-',
+                months: '-',
+                business: '-'
+            };
+        }
 
         const start = d1 < d2 ? d1 : d2;
         const end = d1 < d2 ? d2 : d1;
@@ -75,14 +78,14 @@ const DateCalculator = () => {
         const totalWeeksDays = totalDays % 7;
         const totalMonths = (years * 12) + months;
 
-        setResults({
+        return {
             exact: `${years} years, ${months} months, ${weeks} weeks, ${remainingDays} days`,
             days: `${totalDays} days`,
             weeks: `${totalWeeks} weeks, ${totalWeeksDays} days`,
             months: `${totalMonths} months, ${days} days`,
             business: `${businessDays} days`
-        });
-    };
+        };
+    }, [dateFrom, dateTo]);
 
     const handleDateChange = (value, setter) => {
         // Allow only numbers and hyphens
@@ -103,6 +106,15 @@ const DateCalculator = () => {
 
     return (
         <div id="date-calculator" className="fade-in-slide">
+            {onClose && (
+                <button
+                    className="close-btn-mobile"
+                    onClick={onClose}
+                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--text-color)', cursor: 'pointer', display: 'none' }}
+                >
+                    ✕
+                </button>
+            )}
             <div className="date-inputs">
                 <div className="date-group">
                     <label>From (DD-MM-YYYY)</label>
