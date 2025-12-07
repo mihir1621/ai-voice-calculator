@@ -99,6 +99,7 @@ body {
     height: 100vh;
     margin: 0;
     transition: background 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 .container {
@@ -108,7 +109,16 @@ body {
     border-radius: 14px;
     box-shadow: 0 10px 30px var(--shadow-color);
     transition: background 0.3s ease, box-shadow 0.3s ease, width 0.3s ease;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--display-border);
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .container {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Scientific mode horizontal layout */
@@ -262,6 +272,95 @@ input:checked+.mode-slider .toggle-text::after {
     transform: scale(0.95);
 }
 
+/* Sidebar Styles */
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: var(--bg-color);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 2000;
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--display-border);
+    padding-bottom: 10px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.menu-item {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 15px;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background: var(--btn-action-bg);
+    color: var(--btn-action-text);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1500;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.overlay.visible {
+    display: block;
+    opacity: 1;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 5px;
+    border-radius: 50%;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 /* Keys Container - Flexbox for side-by-side panels */
 .keys-container {
     display: flex;
@@ -296,6 +395,7 @@ input:checked+.mode-slider .toggle-text::after {
     background: var(--btn-bg);
     color: var(--btn-text);
     border: 1px solid transparent;
+    /* Placeholder for border if needed */
     font-size: 18px;
     border-radius: 10px;
     cursor: pointer;
@@ -361,6 +461,7 @@ input:checked+.mode-slider .toggle-text::after {
     body {
         padding: 10px;
         align-items: flex-start;
+        /* Allow scrolling on small screens */
         height: auto;
         min-height: 100vh;
     }
@@ -372,6 +473,7 @@ input:checked+.mode-slider .toggle-text::after {
         margin: 20px 0;
     }
 
+    /* Stack panels vertically on smaller screens */
     .container.scientific-mode {
         width: 100%;
         max-width: 400px;
@@ -379,12 +481,15 @@ input:checked+.mode-slider .toggle-text::after {
 
     .keys-container {
         flex-direction: column-reverse;
+        /* Standard keys on top, scientific below */
         gap: 15px;
     }
 
     .sci-keys {
         display: none;
+        /* Hidden by default */
         grid-template-columns: repeat(4, 1fr);
+        /* 4 columns to match standard keys */
         flex: none;
         width: 100%;
     }
@@ -416,7 +521,95 @@ input:checked+.mode-slider .toggle-text::after {
     }
 }
 
+#bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--bg-color);
+}
+
+#bg-container video,
+#bg-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#changeBgBtn {
+    /* Reset fixed positioning to act as a menu item */
+    position: static;
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    text-align: left;
+    font-size: 16px;
+    font-family: inherit;
+    transition: background 0.2s;
+    margin: 0;
+}
+
+#changeBgBtn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode #changeBgBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Global View Transitions */
+.view-transition {
+    transition: transform 0.32s ease-in-out, opacity 0.32s ease-in-out;
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    width: 100%;
+}
+
+.view-exit {
+    transform: translateX(-100%) scale(0.98);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.view-enter-init {
+    transform: translateX(100%) scale(0.98);
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* Date Calculator Styles */
+#date-calculator {
+    /* Initial state handled by view-transition class */
+}
+
+#date-calculator.hidden {
+    display: none;
+}
+
+#closeDateCalcBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    line-height: 1;
+}
+
 .date-inputs {
     display: flex;
     gap: 15px;
@@ -442,12 +635,17 @@ input:checked+.mode-slider .toggle-text::after {
     border: 1px solid var(--display-border);
     background: var(--display-bg);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: inherit;
-    width: 100%;
-    box-sizing: border-box;
     text-align: center;
     letter-spacing: 1px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.date-group input::placeholder {
+    color: #999;
+    opacity: 0.7;
 }
 
 .date-results {
@@ -464,37 +662,24 @@ input:checked+.mode-slider .toggle-text::after {
     background: var(--btn-bg);
     border-radius: 8px;
     box-shadow: 0 2px 5px var(--shadow-color);
-    flex-wrap: wrap;
 }
 
 .result-item .label {
     font-size: 0.9rem;
     color: var(--text-color);
     opacity: 0.8;
-    flex-shrink: 0;
-    margin-right: 10px;
 }
 
 .result-item .value {
     font-weight: 700;
-    color: var(--text-color) !important;
-    text-align: right;
-    flex: 1;
-    min-width: 100px;
+    color: var(--text-color);
 }
 
-/* Global View Transitions */
-.view-transition {
-    transition: transform 0.32s ease-in-out, opacity 0.32s ease-in-out;
-    transform: translateX(0) scale(1);
-    opacity: 1;
-    width: 100%;
-}
-
-.view-exit {
-    transform: translateX(-100%) scale(0.98);
-    opacity: 0;
-    pointer-events: none;
+/* Date Calculator Action Button */
+.date-action-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .fab-btn {
@@ -523,20 +708,21 @@ input:checked+.mode-slider .toggle-text::after {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes fadeInSlide {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Fix for Date Calculator Layout */
+.result-item {
+    flex-wrap: wrap;
 }
 
-.fade-in-slide {
-    animation: fadeInSlide 0.4s ease-out forwards;
+.result-item .label {
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.result-item .value {
+    text-align: right;
+    flex: 1;
+    min-width: 100px;
+    color: var(--text-color) !important;
 }
 
 /* Calendar Picker Styles */
