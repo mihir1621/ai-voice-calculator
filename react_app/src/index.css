@@ -755,3 +755,22 @@ body.dark-mode #changeBgBtn:hover {
 .calendar-btn:hover {
     transform: scale(1.1);
 }
+
+/* History Styles */
+.history-item {
+    background: var(--btn-bg);
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.history-item:hover {
+    background: var(--btn-action-bg);
+    transform: translateY(-2px);
+}

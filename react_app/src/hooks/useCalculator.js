@@ -195,6 +195,30 @@ export function useCalculator() {
     const [display, setDisplay] = useState('');
     const [lastCalculated, setLastCalculated] = useState(false);
 
+    // Initialize history from localStorage
+    const [history, setHistory] = useState(() => {
+        try {
+            const saved = localStorage.getItem('calc_history');
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            console.error("Failed to load history", e);
+            return [];
+        }
+    });
+
+    // Save history to localStorage whenever it changes
+    const addToHistory = (expression, result) => {
+        const newEntry = { expression, result, timestamp: Date.now() };
+        const updatedHistory = [newEntry, ...history];
+        setHistory(updatedHistory);
+        localStorage.setItem('calc_history', JSON.stringify(updatedHistory));
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+        localStorage.removeItem('calc_history');
+    };
+
     const append = (value) => {
         if (lastCalculated && !isNaN(value)) {
             setDisplay(value);
@@ -245,6 +269,7 @@ export function useCalculator() {
                 setDisplay(res);
                 setLastCalculated(true);
                 speakResult(res);
+                addToHistory(expr, res); // Add to history
                 return;
             }
             // sqrt shortcut
@@ -258,6 +283,7 @@ export function useCalculator() {
                     const res = Number.isInteger(resVal) ? String(resVal) : resVal.toFixed(6).replace(/\.0+$/, '');
                     setDisplay(res);
                     speakResult(res);
+                    addToHistory(`sqrt(${n})`, res); // Add to history
                 }
                 setLastCalculated(true);
                 return;
@@ -267,6 +293,7 @@ export function useCalculator() {
             setDisplay(resStr);
             setLastCalculated(true);
             speakResult(resStr);
+            addToHistory(expr, resStr); // Add to history
         } catch (e) {
             setDisplay('Error');
             speakResult('Error');
@@ -278,6 +305,8 @@ export function useCalculator() {
             const val = display;
             const numVal = Number(safeEval(val || '0'));
             let result;
+            let actionExpr = `${val} ${action}`; // Default expression for history
+
             switch (action) {
                 case '%': {
                     const re = /(\d+(?:\.\d+)?)\s*([+\-*/])\s*(\d+(?:\.\d+)?$)/;
@@ -287,54 +316,71 @@ export function useCalculator() {
                         const op = m[2];
                         const B = parseFloat(m[3]);
                         const computed = (A * B) / 100;
-                        setDisplay(val.slice(0, m.index) + A + op + computed);
+                        const finalExpr = val.slice(0, m.index) + A + op + computed;
+                        setDisplay(finalExpr);
+                        // For inline percent, we don't necessarily calculate the final result yet, 
+                        // so we might not add to history here unless we define 'action' as finalizing the calc.
+                        // The user can press equals later.
                         return;
                     }
                     const m2 = val.match(/(.*?)(\d+(?:\.\d+)?$)/);
                     if (m2) {
                         const prefix = m2[1];
                         const lastNum = parseFloat(m2[2]);
-                        setDisplay(prefix + (lastNum / 100));
+                        const finalVal = prefix + (lastNum / 100);
+                        setDisplay(finalVal);
+                        // Same here, usually intermediate.
                     }
                     return;
                 }
                 case 'square':
                     result = numVal * numVal;
+                    actionExpr = `sqr(${numVal})`;
                     break;
                 case 'sqrt':
                     if (numVal < 0) throw new Error();
                     result = Math.sqrt(numVal);
+                    actionExpr = `sqrt(${numVal})`;
                     break;
                 case 'sin':
                     result = Math.sin(numVal);
+                    actionExpr = `sin(${numVal})`;
                     break;
                 case 'cos':
                     result = Math.cos(numVal);
+                    actionExpr = `cos(${numVal})`;
                     break;
                 case 'tan':
                     result = Math.tan(numVal);
+                    actionExpr = `tan(${numVal})`;
                     break;
                 case 'asin':
                     if (Math.abs(numVal) > 1) throw new Error();
                     result = Math.asin(numVal);
+                    actionExpr = `asin(${numVal})`;
                     break;
                 case 'acos':
                     if (Math.abs(numVal) > 1) throw new Error();
                     result = Math.acos(numVal);
+                    actionExpr = `acos(${numVal})`;
                     break;
                 case 'atan':
                     result = Math.atan(numVal);
+                    actionExpr = `atan(${numVal})`;
                     break;
                 case 'ln':
                     if (numVal <= 0) throw new Error();
                     result = Math.log(numVal);
+                    actionExpr = `ln(${numVal})`;
                     break;
                 case 'log':
                     if (numVal <= 0) throw new Error();
                     result = Math.log10(numVal);
+                    actionExpr = `log(${numVal})`;
                     break;
                 case 'exp':
                     result = Math.exp(numVal);
+                    actionExpr = `exp(${numVal})`;
                     break;
                 case '^':
                     setDisplay((prev) => prev + '^');
@@ -352,6 +398,7 @@ export function useCalculator() {
                 setDisplay(formatted);
                 setLastCalculated(true);
                 speakResult(formatted);
+                addToHistory(actionExpr, formatted); // Add to history
             }
         } catch (e) {
             setDisplay('Error');
@@ -379,6 +426,7 @@ export function useCalculator() {
                     const res = Number.isInteger(resVal) ? String(resVal) : resVal.toFixed(6).replace(/\.0+$/, '');
                     setDisplay(res);
                     speakResult(res);
+                    addToHistory(`sqrt(${n})`, res); // Add to history
                 }
                 setLastCalculated(true);
                 return;
@@ -394,6 +442,7 @@ export function useCalculator() {
                     setDisplay(resStr);
                     setLastCalculated(true);
                     speakResult(resStr);
+                    addToHistory(processed, resStr); // Add to history
                     return;
                 } catch {
                     // Ignore error
@@ -414,6 +463,7 @@ export function useCalculator() {
                         setDisplay(resStr);
                         setLastCalculated(true);
                         speakResult(resStr);
+                        addToHistory(spoken, resStr); // Add to history
                         return;
                     }
                     // Try arithmetic progression detection
@@ -425,6 +475,7 @@ export function useCalculator() {
                         setDisplay(resStr);
                         setLastCalculated(true);
                         speakResult(resStr);
+                        addToHistory(spoken, resStr); // Add to history
                         return;
                     }
                 }
@@ -437,6 +488,7 @@ export function useCalculator() {
                 setDisplay(finalResult);
                 setLastCalculated(true);
                 speakResult(finalResult);
+                addToHistory(spoken, finalResult); // Add to history
             } catch (aiError) {
                 console.error("AI Error caught in hook:", aiError);
                 if (aiError.message.includes('API Key')) {
@@ -463,5 +515,7 @@ export function useCalculator() {
         calculate,
         handleAction,
         handleVoiceInput,
+        history,
+        clearHistory
     };
 }
