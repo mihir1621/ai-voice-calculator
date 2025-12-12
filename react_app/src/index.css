@@ -122,7 +122,8 @@ body.dark-mode .container {
 }
 
 /* Scientific mode horizontal layout */
-.container.scientific-mode {
+.container.scientific-mode,
+.container.graphing-mode {
     width: 750px;
 }
 
@@ -552,7 +553,13 @@ input:checked+.mode-slider .toggle-text::after {
     height: 100%;
     z-index: -1;
     overflow: hidden;
-    background: var(--bg-color);
+    background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+    /* Default Premium Gradient */
+}
+
+body.dark-mode #bg-container {
+    background: linear-gradient(to top, #09203f 0%, #537895 100%);
+    /* Dark Mode Gradient */
 }
 
 #bg-container video,

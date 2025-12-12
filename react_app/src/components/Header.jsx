@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Header = ({ isScientific, onToggleMode, isDark, onToggleTheme, onToggleSidebar, isDateMode, isHistoryMode, isCurrencyMode, isLengthMode, isVolumeMode, isTemperatureMode, isAreaMode, isTimeMode, isAboutMode, onClose, onDownloadPDF, isListening, onStartVoice, onStopVoice }) => {
-    const isSpecialMode = isDateMode || isHistoryMode || isCurrencyMode || isLengthMode || isVolumeMode || isTemperatureMode || isAreaMode || isTimeMode || isAboutMode;
-    const title = isDateMode ? 'Date Calculator' : isHistoryMode ? 'History' : isCurrencyMode ? 'Currency Converter' : isLengthMode ? 'Length Converter' : isVolumeMode ? 'Volume Converter' : isTemperatureMode ? 'Temperature Converter' : isAreaMode ? 'Area Converter' : isTimeMode ? 'Time Converter' : isAboutMode ? 'About Us' : 'AI Voice Calculator';
+const Header = ({ isScientific, onToggleMode, isDark, onToggleTheme, onToggleSidebar, isDateMode, isHistoryMode, isCurrencyMode, isLengthMode, isVolumeMode, isTemperatureMode, isAreaMode, isTimeMode, isAboutMode, isGraphingMode, onClose, onDownloadPDF, isListening, onStartVoice, onStopVoice }) => {
+    const isSpecialMode = isDateMode || isHistoryMode || isCurrencyMode || isLengthMode || isVolumeMode || isTemperatureMode || isAreaMode || isTimeMode || isAboutMode || isGraphingMode;
+    const title = isDateMode ? 'Date Calculator' : isHistoryMode ? 'History' : isCurrencyMode ? 'Currency Converter' : isLengthMode ? 'Length Converter' : isVolumeMode ? 'Volume Converter' : isTemperatureMode ? 'Temperature Converter' : isAreaMode ? 'Area Converter' : isTimeMode ? 'Time Converter' : isAboutMode ? 'About Us' : isGraphingMode ? 'Graphing Calculator' : 'AI Voice Calculator';
 
     return (
         <div className="header">

@@ -11,6 +11,7 @@ import VolumeConverter from './components/VolumeConverter';
 import TemperatureConverter from './components/TemperatureConverter';
 import AreaConverter from './components/AreaConverter';
 import TimeConverter from './components/TimeConverter';
+import Graphing from './components/Graphing';
 import About from './components/About';
 import { useCalculator } from './hooks/useCalculator';
 import { useVoice } from './hooks/useVoice';
@@ -27,6 +28,7 @@ function App() {
   const [isTemperatureMode, setIsTemperatureMode] = useState(false);
   const [isAreaMode, setIsAreaMode] = useState(false);
   const [isTimeMode, setIsTimeMode] = useState(false);
+  const [isGraphingMode, setIsGraphingMode] = useState(false);
   const [isAboutMode, setIsAboutMode] = useState(false);
 
   // Load background from localStorage (lazy initialization)
@@ -195,6 +197,8 @@ function App() {
       switchMode('time');
     } else if (cmd.includes('about') || cmd.includes('who are you')) {
       switchMode('about');
+    } else if (cmd.includes('graphing') || cmd.includes('graph')) {
+      switchMode('graphing');
     } else if (cmd.includes('change background') || cmd.includes('change wallpaper')) {
       fileInputRef.current?.click();
     } else if (
@@ -209,6 +213,7 @@ function App() {
       (cmd.includes('close temperature') && isTemperatureMode) ||
       (cmd.includes('close area') && isAreaMode) ||
       (cmd.includes('close time') && isTimeMode) ||
+      (cmd.includes('close graphing') && isGraphingMode) ||
       (cmd.includes('close scientific') && isScientific) ||
       (cmd.includes('close about') && isAboutMode)
     ) {
@@ -222,6 +227,7 @@ function App() {
         setIsTemperatureMode(false);
         setIsAreaMode(false);
         setIsTimeMode(false);
+        setIsGraphingMode(false);
         setIsAboutMode(false);
         setIsSidebarOpen(false);
       });
@@ -241,6 +247,7 @@ function App() {
         setIsTemperatureMode(false);
         setIsAreaMode(false);
         setIsTimeMode(false);
+        setIsGraphingMode(false);
         setIsAboutMode(false);
         setIsSidebarOpen(false);
       });
@@ -251,7 +258,7 @@ function App() {
     } else if (cmd === 'close' || cmd === 'go back' || cmd.includes('close menu')) {
       if (isSidebarOpen) {
         setIsSidebarOpen(false);
-      } else if (isHistoryMode || isDateMode || isCurrencyMode || isLengthMode || isVolumeMode || isTemperatureMode || isAreaMode || isTimeMode || isAboutMode || isScientific) {
+      } else if (isHistoryMode || isDateMode || isCurrencyMode || isLengthMode || isVolumeMode || isTemperatureMode || isAreaMode || isTimeMode || isGraphingMode || isAboutMode || isScientific) {
         triggerTransition(() => {
           setIsScientific(false);
           setIsHistoryMode(false);
@@ -262,6 +269,7 @@ function App() {
           setIsTemperatureMode(false);
           setIsAreaMode(false);
           setIsTimeMode(false);
+          setIsGraphingMode(false);
           setIsAboutMode(false);
           setIsSidebarOpen(false);
         });
@@ -394,8 +402,9 @@ function App() {
       (mode === 'temperature' && isTemperatureMode) ||
       (mode === 'area' && isAreaMode) ||
       (mode === 'time' && isTimeMode) ||
+      (mode === 'graphing' && isGraphingMode) ||
       (mode === 'about' && isAboutMode) ||
-      (mode === 'std' && !isDateMode && !isHistoryMode && !isCurrencyMode && !isLengthMode && !isVolumeMode && !isTemperatureMode && !isAreaMode && !isTimeMode && !isAboutMode)
+      (mode === 'std' && !isDateMode && !isHistoryMode && !isCurrencyMode && !isLengthMode && !isVolumeMode && !isTemperatureMode && !isAreaMode && !isTimeMode && !isGraphingMode && !isAboutMode)
     ) {
       setIsSidebarOpen(false);
       return;
@@ -411,6 +420,7 @@ function App() {
       setIsTemperatureMode(false);
       setIsAreaMode(false);
       setIsTimeMode(false);
+      setIsGraphingMode(false);
       setIsAboutMode(false);
 
       // Activate the selected mode
@@ -422,6 +432,7 @@ function App() {
       else if (mode === 'temperature') setIsTemperatureMode(true);
       else if (mode === 'area') setIsAreaMode(true);
       else if (mode === 'time') setIsTimeMode(true);
+      else if (mode === 'graphing') setIsGraphingMode(true);
       else if (mode === 'about') setIsAboutMode(true);
 
       setIsSidebarOpen(false);
@@ -437,7 +448,7 @@ function App() {
   return (
     <>
       <div id="bg-container">
-        {bgMedia?.type === 'image' && <img src={bgMedia.src} alt="Background" />}
+        {bgMedia?.type === 'image' && <img src={bgMedia.src} alt="" onError={(e) => e.target.style.display = 'none'} />}
         {bgMedia?.type === 'video' && (
           <video src={bgMedia.src} autoPlay loop muted playsInline />
         )}
@@ -450,7 +461,7 @@ function App() {
         accept="image/*,video/*"
         hidden
       />
-      <div className={`container ${isScientific && !isDateMode && !isHistoryMode ? 'scientific-mode' : ''}`}>
+      <div className={`container ${isScientific && !isDateMode && !isHistoryMode ? 'scientific-mode' : isGraphingMode ? 'graphing-mode' : ''}`}>
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
             <h3>Menu</h3>
@@ -505,6 +516,14 @@ function App() {
               </svg>
               Time Converter
             </button>
+            <button className="menu-item" onClick={() => switchMode('graphing')}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle' }}>
+                <path d="M7 19h10v-2H7v2zm-5-2h4v6h-4v-6zm4 6v-6h6v6h-6zm8-6v6h6v-6h-6zm-8-8h4v6h-4v-6zm4 6v-6h6v6h-6zm8-6v6h6v-6h-6zM3 13h4v-6H3v6zm0-8h4V2H3v3zm0 20h4v-6H3v6z" />
+                {/* Simplified fake graph icon path */}
+                <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z" />
+              </svg>
+              Graphing Calc
+            </button>
             <button
               className="menu-item"
               onClick={() => {
@@ -544,6 +563,7 @@ function App() {
           isTemperatureMode={isTemperatureMode}
           isAreaMode={isAreaMode}
           isTimeMode={isTimeMode}
+          isGraphingMode={isGraphingMode}
           isAboutMode={isAboutMode}
           onClose={() => switchMode('std')}
           onDownloadPDF={() => downloadHistoryPDF()}
@@ -569,6 +589,8 @@ function App() {
             <AreaConverter onClose={() => switchMode('std')} />
           ) : isTimeMode ? (
             <TimeConverter onClose={() => switchMode('std')} />
+          ) : isGraphingMode ? (
+            <Graphing onClose={() => switchMode('std')} isDark={isDark} />
           ) : isAboutMode ? (
             <About onClose={() => switchMode('std')} />
           ) : (
