@@ -179,7 +179,7 @@ function App() {
       } else {
         speak('Geolocation is not supported.');
       }
-    } else if (cmd.includes('open history') || cmd.includes('show history')) {
+    } else if (cmd.includes('history') && !cmd.includes('close') && !cmd.includes('count') && !cmd.includes('clear')) {
       switchMode('history');
     } else if (cmd.includes('date calculator') || cmd.includes('open date')) {
       switchMode('date');
