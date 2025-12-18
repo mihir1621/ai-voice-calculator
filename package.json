@@ -1,0 +1,11 @@
+{
+    "name": "ai-voice-calculator-root",
+    "private": true,
+    "scripts": {
+        "dev": "npm run dev --prefix react_app",
+        "build": "npm run build --prefix react_app",
+        "lint": "npm run lint --prefix react_app",
+        "preview": "npm run preview --prefix react_app",
+        "install-app": "npm install --prefix react_app"
+    }
+}
