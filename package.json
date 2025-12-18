@@ -6,6 +6,7 @@
         "build": "npm run build --prefix react_app",
         "lint": "npm run lint --prefix react_app",
         "preview": "npm run preview --prefix react_app",
-        "install-app": "npm install --prefix react_app"
+        "install-app": "npm install --prefix react_app",
+        "postinstall": "npm install --prefix react_app"
     }
 }
